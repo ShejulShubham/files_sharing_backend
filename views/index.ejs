@@ -1,28 +1,489 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>File Browser</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StreamHub - File Browser</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    ul { list-style: none; padding: 0; }
-    a { text-decoration: none; display: block; margin: 5px 0; }
+    :root {
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --bg-tertiary: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #666666;
+      --accent: #ff0000;
+      --accent-hover: #cc0000;
+      --border: #333333;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body.light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9f9f9;
+      --bg-tertiary: #f0f0f0;
+      --text-primary: #0f0f0f;
+      --text-secondary: #444444;
+      --text-muted: #888888;
+      --accent: #1976d2;
+      --accent-hover: #1565c0;
+      --border: #e0e0e0;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .logo:hover {
+      color: var(--accent);
+    }
+
+    .logo i {
+      margin-right: 10px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 2px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      background: var(--bg-secondary);
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .breadcrumb-item {
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .breadcrumb-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .breadcrumb-item.active {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .breadcrumb-separator {
+      color: var(--text-muted);
+    }
+
+    /* Main Content */
+    .main-content {
+      padding: 20px;
+      min-height: calc(100vh - 129px);
+    }
+
+    .files-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .file-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px var(--shadow);
+      border-color: var(--accent);
+    }
+
+    .file-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .file-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .file-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .file-icon.folder {
+      color: #4fc3f7;
+    }
+
+    .file-icon.video {
+      color: #ff5722;
+    }
+
+    .file-icon.audio {
+      color: #9c27b0;
+    }
+
+    .file-icon.image {
+      color: #4caf50;
+    }
+
+    .file-icon.document {
+      color: #2196f3;
+    }
+
+    .file-icon.archive {
+      color: #ff9800;
+    }
+
+    .file-icon.code {
+      color: #00bcd4;
+    }
+
+    .file-icon.default {
+      color: var(--text-muted);
+    }
+
+    .file-name {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    .file-details {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-type {
+      background: var(--bg-tertiary);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Back Button */
+    .back-button {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+    }
+
+    .back-button:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateX(-5px);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0 15px;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .breadcrumb {
+        padding: 10px 15px;
+      }
+
+      .main-content {
+        padding: 15px;
+      }
+
+      .files-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+      }
+
+      .file-card {
+        padding: 15px;
+      }
+
+      .file-icon {
+        font-size: 36px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .files-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>Directory: <%= path || "/" %></h2>
-  <% if (path) { %>
-    <a href="/files?<%= 'path=' + encodeURIComponent(path.split('/').slice(0, -1).join('/')) %>">🔙 Go Back</a>
-  <% } %>
-  <ul>
-    <% entries.forEach(entry => { %>
-      <li>
-        <% if (entry.isDir) { %>
-          📁 <a href="/files?<%= 'path=' + entry.encodedPath %>"><%= entry.name %></a>
+  <header class="header">
+    <a href="/files" class="logo">
+      <i class="fas fa-play-circle"></i>
+      StreamHub
+    </a>
+    <div class="header-controls">
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-sun"></i>
+        <span>Light</span>
+      </button>
+    </div>
+  </header>
+
+  <nav class="breadcrumb">
+    <a href="/files" class="breadcrumb-item">
+      <i class="fas fa-home"></i> Home
+    </a>
+    <% if (path) { %>
+      <span class="breadcrumb-separator">></span>
+      <% const pathParts = path.split('/').filter(part => part.length > 0); %>
+      <% let currentPath = ''; %>
+      <% pathParts.forEach((part, index) => { %>
+        <% currentPath += '/' + part; %>
+        <% if (index === pathParts.length - 1) { %>
+          <span class="breadcrumb-item active"><%= part %></span>
         <% } else { %>
-          📄 <a href="/file?<%= 'path=' + entry.encodedPath %>"><%= entry.name %></a>
+          <a href="/files?path=<%= encodeURIComponent(currentPath) %>" class="breadcrumb-item"><%= part %></a>
+          <span class="breadcrumb-separator">></span>
         <% } %>
-      </li>
-    <% }) %>
-  </ul>
+      <% }) %>
+    <% } %>
+  </nav>
+
+  <main class="main-content">
+    <% if (path) { %>
+      <a href="/files?<%= 'path=' + encodeURIComponent(path.split('/').slice(0, -1).join('/')) %>" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Back
+      </a>
+    <% } %>
+
+    <% if (entries && entries.length > 0) { %>
+      <div class="files-grid">
+        <% entries.forEach(entry => { %>
+          <% 
+            let icon = 'fas fa-file';
+            let iconClass = 'default';
+            let fileType = 'FILE';
+            
+            if (entry.isDir) {
+              icon = 'fas fa-folder';
+              iconClass = 'folder';
+              fileType = 'FOLDER';
+            } else {
+              const ext = entry.name.split('.').pop().toLowerCase();
+              switch(ext) {
+                case 'mp4': case 'avi': case 'mkv': case 'mov': case 'wmv': case 'flv': case 'webm': case 'm4v':
+                  icon = 'fas fa-video';
+                  iconClass = 'video';
+                  fileType = 'VIDEO';
+                  break;
+                case 'mp3': case 'wav': case 'flac': case 'aac': case 'ogg': case 'm4a':
+                  icon = 'fas fa-music';
+                  iconClass = 'audio';
+                  fileType = 'AUDIO';
+                  break;
+                case 'jpg': case 'jpeg': case 'png': case 'gif': case 'bmp': case 'svg': case 'webp':
+                  icon = 'fas fa-image';
+                  iconClass = 'image';
+                  fileType = 'IMAGE';
+                  break;
+                case 'pdf': case 'doc': case 'docx': case 'txt': case 'rtf':
+                  icon = 'fas fa-file-alt';
+                  iconClass = 'document';
+                  fileType = 'DOCUMENT';
+                  break;
+                case 'zip': case 'rar': case '7z': case 'tar': case 'gz':
+                  icon = 'fas fa-file-archive';
+                  iconClass = 'archive';
+                  fileType = 'ARCHIVE';
+                  break;
+                case 'js': case 'html': case 'css': case 'php': case 'py': case 'java': case 'cpp': case 'c':
+                  icon = 'fas fa-code';
+                  iconClass = 'code';
+                  fileType = 'CODE';
+                  break;
+                default:
+                  icon = 'fas fa-file';
+                  iconClass = 'default';
+                  fileType = 'FILE';
+              }
+            }
+          %>
+          <a href="<%= entry.isDir ? '/files?path=' + entry.encodedPath : '/file?path=' + entry.encodedPath %>" class="file-card">
+            <i class="<%= icon %> file-icon <%= iconClass %>"></i>
+            <div class="file-name"><%= entry.name %></div>
+            <div class="file-details">
+              <span class="file-type"><%= fileType %></span>
+              <% if (!entry.isDir) { %>
+                <span><%= entry.size || '' %></span>
+              <% } %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3>No files found</h3>
+        <p>This directory appears to be empty.</p>
+      </div>
+    <% } %>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const button = document.querySelector('.theme-toggle');
+      const icon = button.querySelector('i');
+      const text = button.querySelector('span');
+      
+      if (body.classList.contains('light')) {
+        body.classList.remove('light');
+        icon.className = 'fas fa-sun';
+        text.textContent = 'Light';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.add('light');
+        icon.className = 'fas fa-moon';
+        text.textContent = 'Dark';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light');
+        const button = document.querySelector('.theme-toggle');
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span');
+        icon.className = 'fas fa-moon';
+        text.textContent = 'Dark';
+      }
+    });
+  </script>
 </body>
-</html>
+</html> 
