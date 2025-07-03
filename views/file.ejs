@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stream Center</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+    }
+    header {
+      background-color: #202020;
+      color: white;
+      padding: 16px;
+      font-size: 24px;
+    }
+    .container {
+      display: flex;
+      padding: 20px;
+    }
+    .sidebar {
+      width: 260px;
+      background-color: #fff;
+      border-right: 1px solid #ddd;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+    .sidebar a {
+      display: block;
+      padding: 12px 16px;
+      color: #333;
+      text-decoration: none;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .sidebar a:hover {
+      background-color: #eee;
+    }
+    .main {
+      flex: 1;
+      padding: 20px;
+    }
+    video {
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+      background: black;
+      display: block;
+      margin-bottom: 16px;
+    }
+    .actions a {
+      margin-right: 16px;
+      text-decoration: none;
+      color: white;
+      background: #cc0000;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .actions a:hover {
+      background: #ff0000;
+    }
+  </style>
+</head>
+<body>
+  <header>🎬 Stream Center</header>
+  <div class="container">
+    <div class="sidebar">
+      <% entries.forEach(entry => { %>
+        <% if (entry.isDir) { %>
+          <a href="/files?<%= 'path=' + entry.encodedPath %>">📁 <%= entry.name %></a>
+        <% } else { %>
+          <a href="/file?<%= 'path=' + entry.encodedPath %>">🎥 <%= entry.name %></a>
+        <% } %>
+      <% }) %>
+    </div>
+    <div class="main">
+      <% if (filename) { %>
+        <video controls src="/stream?path=<%= encodedPath %>"></video>
+        <div class="actions">
+          <a href="/download?path=<%= encodedPath %>">⬇️ Download</a>
+          <a href="/stream?path=<%= encodedPath %>" target="_blank">Open in New Tab</a>
+        </div>
+      <% } else { %>
+        <p>Select a video from the sidebar to stream.</p>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>
