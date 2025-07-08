@@ -10,12 +10,12 @@
     <div class="container py-4">
       <h2><i class="fas fa-file-alt"></i> <%= filename %></h2>
 
-      <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-          <% if (path) {
-            const parts = path.split('/').filter(Boolean);
-            let partial = ''; %>
+      <% if (path) { 
+        const parts = path.split('/').filter(Boolean);
+        let partial = ''; %>
+        <nav aria-label="breadcrumb" class="mb-4">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
             <% parts.forEach((part, index) => {
               partial += '/' + part;
               const isLast = index === parts.length - 1; %>
@@ -24,31 +24,46 @@
                   <a href="/files?path=<%= encodeURIComponent(partial) %>" class="text-decoration-none"><%= part %></a>
                 <% } %>
               </li>
-            <% }); %>
-          <% } %>
-        </ol>
-      </nav>
+            <% }) %>
+          </ol>
+        </nav>
+      <% } %>
 
       <p>
-        <a href="/download?path=<%= encodedPath %>" class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Download</a>
+        <a href="/download?path=<%= encodedPath %>" class="btn btn-primary btn-sm">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <a href="javascript:history.back()" class="btn btn-outline-light btn-sm ms-2">
+          <i class="fas fa-arrow-left"></i> Back
+        </a>
       </p>
 
-      <% const ext = filename.split('.').pop().toLowerCase(); %>
+      <% 
+        const ext = filename.split('.').pop().toLowerCase(); 
+        const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+        const videoTypes = ['mp4', 'webm', 'mkv'];
+        const audioTypes = ['mp3', 'wav', 'ogg'];
+        const textTypes = ['txt', 'log', 'json'];
+      %>
 
-      <% if (['mp4', 'webm', 'mkv'].includes(ext)) { %>
-        <video class="w-100 rounded" controls>
+      <% if (imageTypes.includes(ext)) { %>
+        <div class="mt-3">
+          <img src="/stream?path=<%= encodedPath %>" alt="<%= filename %>" class="img-fluid rounded shadow" />
+        </div>
+      <% } else if (videoTypes.includes(ext)) { %>
+        <video class="w-100 rounded mt-3" controls>
           <source src="/stream?path=<%= encodedPath %>" type="video/<%= ext === 'mkv' ? 'webm' : ext %>">
           Your browser does not support the video tag.
         </video>
-      <% } else if (['mp3', 'wav', 'ogg'].includes(ext)) { %>
+      <% } else if (audioTypes.includes(ext)) { %>
         <audio class="w-100 mt-3" controls>
           <source src="/stream?path=<%= encodedPath %>" type="audio/<%= ext %>">
           Your browser does not support the audio tag.
         </audio>
-      <% } else if (['txt', 'log', 'json'].includes(ext)) { %>
-        <pre class="bg-secondary p-3 rounded mt-3">
-<%= require('fs').readFileSync(path.join(__dirname, '../../', decodeURIComponent(encodedPath)), 'utf-8') %>
-        </pre>
+      <% } else if (textTypes.includes(ext)) { %>
+        <div class="bg-secondary p-3 rounded mt-3">
+          <pre class="text-white"><%= require('fs').readFileSync(path.join(__dirname, '../../', decodeURIComponent(encodedPath)), 'utf-8') %></pre>
+        </div>
       <% } else { %>
         <div class="alert alert-info mt-3">Preview not available for this file type.</div>
       <% } %>
