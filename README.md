@@ -1,4 +1,3 @@
-````markdown
 # 📁 File Sharing Web App
 
 A clean, responsive file sharing and streaming web application built using **Node.js**, **Express**, and **EJS** templating.  
@@ -40,7 +39,7 @@ Supports file/folder browsing, media streaming (audio/video/image), text preview
    ```bash
    git clone https://github.com/ShejulShubham/files_sharing_backend
    cd files-sharing-app
-````
+   ```
 
 3. **Install dependencies:**
 
