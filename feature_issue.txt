@@ -1,0 +1,6 @@
+# features
+1. create a app for linux, windows.
+2.
+
+# issues
+1.

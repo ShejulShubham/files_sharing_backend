@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # ----------------- CONFIG -----------------
-PORT=80
-URL="http://localhost/files"
+PORT=5000
+URL="http://localhost"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_FILE="server.js"
 
@@ -40,7 +40,7 @@ fi
 
 # Get local IP for external access
 LOCAL_IP=$(hostname -I | awk '{print $1}')
-EXTERNAL_URL="http://$LOCAL_IP/files"
+EXTERNAL_URL="http://$LOCAL_IP/"
 
 echo ""
 echo "🚀 Starting File Sharing Server..."
