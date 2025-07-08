@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const app = express();
+const os = require("os");
 
 const PORT = process.env.PORT || 3000;
 const sharedDir = path.resolve(__dirname, "..");
@@ -14,6 +15,24 @@ const IGNORED_FILES = new Set([
   ".git",
   ".env",
 ]);
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const iface of Object.values(interfaces)) {
+    for (const config of iface) {
+      if (
+        config.family === "IPv4" &&
+        !config.internal &&
+        !config.address.startsWith("172.") // skip docker IPs
+      ) {
+        return config.address;
+      }
+    }
+  }
+  return "localhost";
+}
+
+const localIP = getLocalIP();
 
 function isVisible(name) {
   return !IGNORED_FILES.has(name);
@@ -40,7 +59,7 @@ async function getDirectoryContents(absPath, relPath = "") {
 
 app.get("/", async (req, res) => {
   const entries = await getDirectoryContents(sharedDir);
-  res.render("index", { path: "", entries });
+  res.render("index", { path: "", entries, localIP, port: PORT, });
 });
 
 app.get("/files", async (req, res) => {
@@ -50,7 +69,7 @@ app.get("/files", async (req, res) => {
     return res.status(403).render("error", { message: "Access denied" });
 
   const entries = await getDirectoryContents(absPath, relPath);
-  res.render("index", { path: relPath, entries });
+  res.render("index", { path: relPath, entries, localIP, port: PORT, });
 });
 
 app.get("/file", async (req, res) => {
@@ -83,6 +102,8 @@ app.get("/file", async (req, res) => {
       encodedPath: encodeURIComponent(relPath),
       entries,
       fileContent: content,
+      localIP,
+      port: PORT,
     });
   } catch (err) {
     console.error("Error viewing file:", err);
