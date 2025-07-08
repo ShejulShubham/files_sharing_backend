@@ -54,22 +54,40 @@ app.get("/files", async (req, res) => {
 });
 
 app.get("/file", async (req, res) => {
-  const relPath = decodeURIComponent(req.query.path || "");
-  const absPath = path.join(sharedDir, relPath);
-  const dirPath = path.dirname(relPath);
-  const absDir = path.join(sharedDir, dirPath);
+  try {
+    const relPath = decodeURIComponent(req.query.path || "");
+    if (!relPath) return res.redirect("/");
 
-  const stats = await fs.promises.stat(absPath);
-  if (!stats.isFile())
-    return res.status(404).render("error", { message: "File not found" });
+    const absPath = path.join(sharedDir, relPath);
+    const dirPath = path.dirname(relPath);
+    const absDir = path.join(sharedDir, dirPath);
 
-  const entries = await getDirectoryContents(absDir, dirPath);
-  res.render("file", {
-    path: dirPath,
-    filename: path.basename(relPath),
-    encodedPath: encodeURIComponent(relPath),
-    entries,
-  });
+    const stats = await fs.promises.stat(absPath);
+    if (!stats.isFile())
+      return res.status(404).render("error", { message: "File not found" });
+
+    const entries = await getDirectoryContents(absDir, dirPath);
+
+    const filename = path.basename(relPath);
+    const ext = filename.split(".").pop().toLowerCase();
+    let content = "";
+
+    const textTypes = ["txt", "log", "json", "md"];
+    if (textTypes.includes(ext)) {
+      content = await fs.promises.readFile(absPath, "utf-8");
+    }
+
+    res.render("file", {
+      path: relPath,
+      filename,
+      encodedPath: encodeURIComponent(relPath),
+      entries,
+      fileContent: content,
+    });
+  } catch (err) {
+    console.error("Error viewing file:", err);
+    res.status(500).render("error", { message: "Error loading file" });
+  }
 });
 
 app.get("/stream", (req, res) => {

@@ -1,6 +1,7 @@
 # features
-1. create a app for linux, windows.
-2.
+1. create an app for linux, windows.
+2. add reverse proxy for this app
+3. 
 
 # issues
 1.
