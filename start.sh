@@ -1,74 +1,59 @@
 #!/bin/bash
 
-# ----------------- CONFIG -----------------
+# -------------------- CONFIG ---------------------
 PORT=5000
-URL="http://localhost"
+URL="http://localhost:$PORT"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_FILE="server.js"
-
-# HARDCODE YOUR USER'S NVM PATH
 REAL_USER_HOME="/home/shubham-shejul"
 NVM_DIR="$REAL_USER_HOME/.nvm"
-# ------------------------------------------
+# -------------------------------------------------
 
-# Ensure we're in project directory
-cd "$PROJECT_DIR" || exit 1
+echo -e "\n\033[1;36m🔧 File Sharing App Setup\033[0m"
 
-# ✅ Load NVM (even under sudo)
+# Move to project directory
+cd "$PROJECT_DIR" || { echo "❌ Failed to enter project directory."; exit 1; }
+
+# Load NVM
 if [ -s "$NVM_DIR/nvm.sh" ]; then
   export NVM_DIR="$NVM_DIR"
   . "$NVM_DIR/nvm.sh"
+  echo "📦 NVM loaded from $NVM_DIR"
+else
+  echo "⚠️  NVM not found. Make sure it's installed at $NVM_DIR"
 fi
 
-# Optional: use a specific Node version
-# nvm use 18
-
-# Check if node is available
-NODE_PATH=$(command -v node)
-if [ -z "$NODE_PATH" ]; then
-  echo "❌ Error: Node.js is not installed or not found in PATH."
+# Ensure Node is available
+if ! command -v node >/dev/null 2>&1; then
+  echo "❌ Node.js not found. Please install it and try again."
   exit 1
 fi
 
-echo "🚧 Checking dependencies..."
+echo "✅ Node version: $(node -v)"
+
+# Install dependencies if needed
 if [ ! -d node_modules ]; then
-  echo "📦 Installing dependencies..."
-  npm install
+  echo -e "\n📦 Installing dependencies..."
+  npm install || { echo "❌ npm install failed."; exit 1; }
 else
-  echo "✅ Dependencies already installed."
+  echo -e "\n✅ Dependencies are already installed."
 fi
 
-# Get local IP for external access
+# Show network info
 LOCAL_IP=$(hostname -I | awk '{print $1}')
-EXTERNAL_URL="http://$LOCAL_IP/"
+EXTERNAL_URL="http://$LOCAL_IP:$PORT"
 
-echo ""
-echo "🚀 Starting File Sharing Server..."
-echo "📂 Project directory: $PROJECT_DIR"
+echo -e "\n🚀 \033[1;32mStarting the server on port $PORT...\033[0m"
+echo "📂 Project Directory: $PROJECT_DIR"
+echo "🌐 Access URL (local):    $URL"
+echo "🌐 Access URL (external): $EXTERNAL_URL"
 
-# Start the server (run in background)
-PORT=$PORT node "$SERVER_FILE" &
+# Handle Ctrl+C and terminal close to stop server
+cleanup() {
+  echo -e "\n🛑 Server stopped."
+  exit 0
+}
+trap cleanup SIGINT SIGTERM
 
-# Wait briefly
-sleep 1
-
-# Show URLs
-echo ""
-echo "🌐 Access from this device: $URL"
-echo "📡 Access from other devices: $EXTERNAL_URL"
-echo ""
-
-# Try to open in browser only if not running as root
-if [ "$(id -u)" -ne 0 ]; then
-  if command -v xdg-open >/dev/null; then
-    xdg-open "$URL"
-  elif command -v open >/dev/null; then
-    open "$URL"
-  elif command -v start >/dev/null; then
-    start "$URL"
-  else
-    echo "❗ Unable to auto-open browser. Please open manually: $URL"
-  fi
-else
-  echo "⚠️  Running as root, skipping browser launch due to sandbox restrictions."
-fi
+# Start the server in foreground
+PORT=$PORT node "$SERVER_FILE"
