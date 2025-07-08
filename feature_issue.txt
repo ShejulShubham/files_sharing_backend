@@ -3,7 +3,11 @@
 2. add reverse proxy for this app
 3. add qr code button
 4. create readme file
-5. 
+5. add pdf previews
+6. theme toggle button
+7. Markdown rendering for .md files
+8. JSON pretty print
+9.
 
 # issues
 1.
