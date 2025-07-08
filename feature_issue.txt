@@ -1,7 +1,9 @@
 # features
 1. create an app for linux, windows.
 2. add reverse proxy for this app
-3. 
+3. add qr code button
+4. create readme file
+5. 
 
 # issues
 1.
