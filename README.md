@@ -49,13 +49,11 @@ Supports file/folder browsing, media streaming (audio/video/image), text preview
 
 4. **Run the app:**
 
-   ```bash
-   node server.js
-   ```
+   double click on file `start.bat` it will open a command line with hosting URL
 
 5. **Open your browser:**
 
-   * [http://localhost:3000](http://localhost:3000)
+   * [http://localhost:5000](http://localhost:5000)
 
 ---
 
@@ -100,7 +98,7 @@ Supports file/folder browsing, media streaming (audio/video/image), text preview
   Modify `sharedDir` in `server.js` to point to a different directory.
 
 * **Change port:**
-  Update `PORT=3000` in script.
+  Update `PORT=5000` in script.
 
 ---
 
