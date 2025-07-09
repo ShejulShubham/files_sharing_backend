@@ -7,7 +7,36 @@ const os = require("os");
 const PORT = process.env.PORT || 3000;
 const sharedDir = path.resolve(__dirname, "..");
 
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
+function getFileTypeLabel(ext) {
+  const types = {
+    image: ["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"],
+    video: ["mp4", "webm", "mkv"],
+    audio: ["mp3", "wav", "ogg"],
+    text: ["txt", "log", "json", "md"],
+    pdf: ["pdf"],
+    archive: ["zip", "rar", "tar", "gz"],
+    code: ["js", "html", "css", "java", "py", "cpp", "c", "ts", "php"],
+  };
+
+  for (const [label, extensions] of Object.entries(types)) {
+    if (extensions.includes(ext)) {
+      return label.charAt(0).toUpperCase() + label.slice(1) + " File";
+    }
+  }
+
+  return "Unknown File Type";
+}
+
 const IGNORED_FILES = new Set([
+  "files_sharing_backend",
   "file-share",
   "node_modules",
   "package.json",
@@ -59,7 +88,7 @@ async function getDirectoryContents(absPath, relPath = "") {
 
 app.get("/", async (req, res) => {
   const entries = await getDirectoryContents(sharedDir);
-  res.render("index", { path: "", entries, localIP, port: PORT, });
+  res.render("index", { path: "", entries, localIP, port: PORT });
 });
 
 app.get("/files", async (req, res) => {
@@ -69,7 +98,7 @@ app.get("/files", async (req, res) => {
     return res.status(403).render("error", { message: "Access denied" });
 
   const entries = await getDirectoryContents(absPath, relPath);
-  res.render("index", { path: relPath, entries, localIP, port: PORT, });
+  res.render("index", { path: relPath, entries, localIP, port: PORT });
 });
 
 app.get("/file", async (req, res) => {
@@ -85,10 +114,15 @@ app.get("/file", async (req, res) => {
     if (!stats.isFile())
       return res.status(404).render("error", { message: "File not found" });
 
+    const fileSize = stats.size;
+
     const entries = await getDirectoryContents(absDir, dirPath);
 
     const filename = path.basename(relPath);
     const ext = filename.split(".").pop().toLowerCase();
+    const fileSizeFormatted = formatFileSize(fileSize);
+    const fileTypeLabel = getFileTypeLabel(ext);
+
     let content = "";
 
     const textTypes = ["txt", "log", "json", "md"];
@@ -102,6 +136,9 @@ app.get("/file", async (req, res) => {
       encodedPath: encodeURIComponent(relPath),
       entries,
       fileContent: content,
+      fileSize,
+      fileSizeFormatted,
+      fileTypeLabel,
       localIP,
       port: PORT,
     });
