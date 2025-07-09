@@ -48,6 +48,15 @@ echo "📂 Project Directory: $PROJECT_DIR"
 echo "🌐 Access URL (local):    $URL"
 echo "🌐 Access URL (external): $EXTERNAL_URL"
 
+# Open default browser (only if xdg-open exists)
+if command -v xdg-open >/dev/null 2>&1; then
+  sleep 2
+  xdg-open "$URL" &
+  echo "🖥️  Opening browser to $URL..."
+else
+  echo "⚠️  'xdg-open' not found. Please open $URL manually."
+fi
+
 # Handle Ctrl+C and terminal close to stop server
 cleanup() {
   echo -e "\n🛑 Server stopped."

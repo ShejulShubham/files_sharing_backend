@@ -55,11 +55,16 @@ echo 🌐 Access URL (local):    %URL%
 echo 🌐 Access URL (external): %EXTERNAL_URL%
 echo.
 
-:: Start server in foreground
-set PORT=%PORT%
-call node "%SERVER_FILE%"
+:: Start server in a new window
+start "Node Server" cmd /k "cd /d %PROJECT_DIR% && set PORT=%PORT% && node %SERVER_FILE%"
 
-:: Optional: Pause before exit
+:: Open the default browser to localhost
+timeout /t 2 >nul
+start %URL%
+
+:: Optional: show message and pause
 echo.
-echo 🛑 Server stopped.
+echo 🖥️  Browser should now be open at: %URL%
+echo 🛑 To stop the server, close the new window or press Ctrl+C inside it.
 pause
+
