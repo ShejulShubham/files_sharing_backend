@@ -95,6 +95,11 @@
         text-overflow: ellipsis;
       }
 
+      .ip-address {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       @media (min-width: 576px) {
         .file-entry {
           flex-direction: row;
@@ -258,6 +263,8 @@
                 data-bs-dismiss="modal"
               ></button>
             </div>
+            <br />
+            <h6 id="ip-address" class="ip-address d-none"></h6>
             <div class="modal-body">
               <div id="qrCodeCanvas"></div>
               <div id="offlineMsg" class="text-danger mt-2 d-none">
@@ -276,6 +283,7 @@
       function showQRCode() {
         const qrModal = new bootstrap.Modal(document.getElementById("qrModal"));
         const qrDiv = document.getElementById("qrCodeCanvas");
+        const ip_address = document.getElementById("ip-address");
         const offlineMsg = document.getElementById("offlineMsg");
 
         qrDiv.innerHTML = "";
@@ -284,9 +292,11 @@
         const port = location.port || "<%= port %>";
         const path = location.pathname + location.search;
         const fullURL = `${location.protocol}//${ip}:${port}${path}`;
+        ip_address.textContent = fullURL;
 
         if (navigator.onLine) {
           offlineMsg.classList.add("d-none");
+          ip_address.classList.remove("d-none");
           QRCode.toCanvas(
             document.createElement("canvas"),
             fullURL,
@@ -296,6 +306,7 @@
             }
           );
         } else {
+          ip_address.classList.add("d-none");
           offlineMsg.classList.remove("d-none");
         }
 
