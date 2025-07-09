@@ -22,6 +22,86 @@
       .breadcrumb-item a {
         text-decoration: none;
       }
+
+      .file-entry {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+      }
+
+      .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+      }
+
+      .file-card {
+        background-color: #1f1f1f;
+        border: 1px solid #444;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        word-wrap: break-word;
+        overflow: hidden;
+        height: 100%;
+        transition: background-color 0.2s;
+      }
+
+      .file-card:hover {
+        background-color: #2a2a2a;
+      }
+
+      .file-icon {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+      }
+
+      .file-name {
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+      }
+
+      .file-card {
+        background-color: #1f1f1f;
+        border: 1px solid #444;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        overflow: hidden;
+        transition: background-color 0.2s;
+      }
+
+      .file-card:hover {
+        background-color: #2a2a2a;
+      }
+
+      .file-icon {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+      }
+
+      .file-name {
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      @media (min-width: 576px) {
+        .file-entry {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
     </style>
   </head>
   <body class="bg-dark text-light">
@@ -32,28 +112,44 @@
           <i class="fas fa-folder-open"></i>
           File Explorer
         </h2>
-        <button onclick="showQRCode()" class="btn btn-outline-info btn-sm" title="Share via QR">
+        <button
+          onclick="showQRCode()"
+          class="btn btn-outline-info btn-sm"
+          title="Share via QR"
+        >
           <i class="fas fa-qrcode"> Share via QR</i>
+        </button>
+      </div>
+      <div class="d-flex flex-row-reverse gap-2">
+        <button
+          onclick="toggleView()"
+          class="btn btn-outline-light btn-sm m-3"
+          title="Toggle View"
+        >
+          <i class="fas fa-th" id="toggleIcon"></i>
+          Toggle view
         </button>
       </div>
 
       <!-- Breadcrumb -->
-      <% if (path) {
-           const parts = path.split('/').filter(Boolean);
-           let partial = '';
-      %>
+      <% if (path) { const parts = path.split('/').filter(Boolean); let partial
+      = ''; %>
       <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb bg-transparent p-0 m-0">
           <li class="breadcrumb-item">
             <a href="/" class="text-light">Home</a>
           </li>
-          <% parts.forEach((part, index) => {
-               partial += '/' + part;
-               const isLast = index === parts.length - 1;
-          %>
-          <li class="breadcrumb-item <%= isLast ? 'active text-warning' : '' %>">
+          <% parts.forEach((part, index) => { partial += '/' + part; const
+          isLast = index === parts.length - 1; %>
+          <li
+            class="breadcrumb-item <%= isLast ? 'active text-warning' : '' %>"
+          >
             <% if (isLast) { %><%= part %><% } else { %>
-              <a href="/files?path=<%= encodeURIComponent(partial) %>" class="text-light"><%= part %></a>
+            <a
+              href="/files?path=<%= encodeURIComponent(partial) %>"
+              class="text-light"
+              ><%= part %></a
+            >
             <% } %>
           </li>
           <% }) %>
@@ -63,32 +159,91 @@
 
       <!-- File and Folder List -->
       <% if (entries.length === 0) { %>
-        <div class="alert alert-warning">📁 This folder is empty.</div>
+      <div class="alert alert-warning">📁 This folder is empty.</div>
       <% } else { %>
-        <ul class="list-group">
-          <% entries.forEach(entry => { %>
-            <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between align-items-center">
-              <div>
-                <% if (entry.isDir) { %>
-                  <i class="fas fa-folder text-warning me-2"></i>
-                  <a href="/files?path=<%= entry.encodedPath %>" class="text-light text-decoration-none">
-                    <%= entry.name %>
-                  </a>
-                <% } else { %>
-                  <i class="fas fa-file text-muted me-2"></i>
-                  <a href="/file?path=<%= entry.encodedPath %>" class="text-light text-decoration-none">
-                    <%= entry.name %>
-                  </a>
-                <% } %>
-              </div>
-              <% if (!entry.isDir) { %>
-                <a href="/download?path=<%= entry.encodedPath %>" class="btn btn-sm btn-outline-light">
-                  <i class="fas fa-download"></i>
-                </a>
-              <% } %>
-            </li>
-          <% }); %>
-        </ul>
+
+      <!-- GRID VIEW -->
+      <div id="gridView" class="file-grid">
+        <% entries.forEach(entry => { %>
+        <div class="file-card">
+          <% if (entry.isDir) { %>
+          <a
+            href="/files?path=<%= entry.encodedPath %>"
+            class="text-light text-decoration-none"
+            title="<%= entry.name %>"
+          >
+            <div class="file-icon text-warning">
+              <i class="fas fa-folder"></i>
+            </div>
+            <div class="file-name"><%= entry.name %></div>
+          </a>
+          <% } else { %>
+          <a
+            href="/file?path=<%= entry.encodedPath %>"
+            class="text-light text-decoration-none"
+            title="<%= entry.name %>"
+          >
+            <div class="file-icon text-muted">
+              <i class="fas fa-file"></i>
+            </div>
+            <div class="file-name"><%= entry.name %></div>
+          </a>
+          <div class="mt-2">
+            <a
+              href="/download?path=<%= entry.encodedPath %>"
+              class="btn btn-sm btn-outline-light"
+              title="Download"
+            >
+              <i class="fas fa-download"></i>
+            </a>
+          </div>
+          <% } %>
+        </div>
+        <% }); %>
+      </div>
+
+      <!-- LIST VIEW -->
+      <ul id="listView" class="list-group d-none">
+        <% entries.forEach(entry => { %>
+        <li
+          class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between align-items-center"
+        >
+          <div
+            class="d-flex align-items-center overflow-hidden"
+            style="gap: 8px"
+          >
+            <% if (entry.isDir) { %>
+            <i class="fas fa-folder text-warning"></i>
+            <a
+              href="/files?path=<%= entry.encodedPath %>"
+              class="text-light text-decoration-none text-truncate"
+              title="<%= entry.name %>"
+            >
+              <%= entry.name %>
+            </a>
+            <% } else { %>
+            <i class="fas fa-file text-muted"></i>
+            <a
+              href="/file?path=<%= entry.encodedPath %>"
+              class="text-light text-decoration-none text-truncate"
+              title="<%= entry.name %>"
+            >
+              <%= entry.name %>
+            </a>
+            <% } %>
+          </div>
+          <% if (!entry.isDir) { %>
+          <a
+            href="/download?path=<%= entry.encodedPath %>"
+            class="btn btn-sm btn-outline-light"
+            title="Download"
+          >
+            <i class="fas fa-download"></i>
+          </a>
+          <% } %>
+        </li>
+        <% }); %>
+      </ul>
       <% } %>
 
       <!-- QR Code Modal -->
@@ -97,7 +252,11 @@
           <div class="modal-content bg-dark text-light text-center p-3">
             <div class="modal-header border-0 pb-0">
               <h5 class="modal-title w-100 text-center">Share via QR</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
             </div>
             <div class="modal-body">
               <div id="qrCodeCanvas"></div>
@@ -141,6 +300,24 @@
         }
 
         qrModal.show();
+      }
+
+      function toggleView() {
+        const grid = document.getElementById("gridView");
+        const list = document.getElementById("listView");
+        const icon = document.getElementById("toggleIcon");
+
+        grid.classList.toggle("d-none");
+        list.classList.toggle("d-none");
+
+        // Switch icon
+        if (grid.classList.contains("d-none")) {
+          icon.classList.remove("fa-th");
+          icon.classList.add("fa-list");
+        } else {
+          icon.classList.remove("fa-list");
+          icon.classList.add("fa-th");
+        }
       }
     </script>
   </body>
