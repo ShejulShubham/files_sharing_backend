@@ -1,15 +1,51 @@
 #!/bin/bash
 
+# -------------------- COLOR CODES ---------------------
+RED='\e[1;31m'
+GREEN='\e[1;32m'
+YELLOW='\e[1;33m'
+BLUE='\e[1;34m'
+CYAN='\e[1;36m'
+RESET='\e[0m'
+
 # -------------------- CONFIG ---------------------
 PORT=5000
 URL="http://localhost:$PORT"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_FILE="server.js"
+PARENT_PATH=$(dirname "$PROJECT_DIR")
 REAL_USER_HOME="/home/shubham-shejul"
 NVM_DIR="$REAL_USER_HOME/.nvm"
-# -------------------------------------------------
 
+# -------------------------------------------------
 echo -e "\n\033[1;36m🔧 File Sharing App Setup\033[0m"
+
+# Custom path for sharing
+read -e -p $'\e[1;35mWould you like to share custom folder? (y/n):\e[0m ' CHOICE
+
+if [[ "$CHOICE" =~ ^[Yy]$ ]]; then
+    while true; do
+        echo -e "${GREEN}1.${RESET} ${CYAN}Enter the file path that you want to share${RESET} OR ${YELLOW}simply leave it blank to exit${RESET}"
+        echo -e "${YELLOW}Note:${RESET} You can use ${BLUE}TAB${RESET} to auto-complete folders."
+
+        read -e -p $'\e[1;35mEnter file path:\e[0m ' DIRECTORY_PATH
+
+    if [[ -z "$DIRECTORY_PATH" ]]; then
+        DIRECTORY_PATH=$PARENT_PATH
+        echo -e "${YELLOW}⚠️ No input provided. Will share the parent folder${RESET}"
+        break
+    elif [[ -d "$DIRECTORY_PATH" ]]; then
+        break
+    else
+        echo "❌ Invalid directory. Please try again."
+    fi
+    done
+else
+    DIRECTORY_PATH=$PARENT_PATH
+    echo -e "${YELLOW}No directory provided. Will share the parent folder${RESET}"
+fi
+
+echo -e "✅ Sharing: $DIRECTORY_PATH"
 
 # Move to project directory
 cd "$PROJECT_DIR" || { echo "❌ Failed to enter project directory."; exit 1; }
@@ -65,4 +101,4 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Start the server in foreground
-PORT=$PORT node "$SERVER_FILE"
+PORT=$PORT node "$SERVER_FILE" "$DIRECTORY_PATH"

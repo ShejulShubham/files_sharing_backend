@@ -4,8 +4,9 @@ const path = require("path");
 const app = express();
 const os = require("os");
 
-const PORT = process.env.PORT || 3000;
-const sharedDir = path.resolve(__dirname, "..");
+const directory = process.argv[2] || "..";
+const PORT = 5000;
+const sharedDir = path.resolve(__dirname, directory);
 
 function formatFileSize(bytes) {
   if (bytes === 0) return "0 B";
