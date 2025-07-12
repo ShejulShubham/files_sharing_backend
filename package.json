@@ -10,7 +10,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder -wl"
   },
   "dependencies": {
     "ejs": "^3.1.10",
@@ -23,17 +26,25 @@
     "electron-builder": "^26.0.12"
   },
   "build": {
-    "productName": "FileShare",
-    "appId": "com.shubham.fileshare",
+    "appId": "com.yourdomain.filesharingapp",
+    "productName": "FileSharingApp",
     "files": [
-      "**/*",
-      "!node_modules/.cache"
+      "!server.js",
+      "views/**/*",
+      "assets/**/*",
+      "electron-main.js"
     ],
-    "directories": {
-      "output": "dist"
-    },
+    "extraResources": [
+      "server.js"
+    ],
     "linux": {
-      "target": ["AppImage", "deb"]
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "nsis"
     }
   }
 }

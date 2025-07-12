@@ -37,17 +37,24 @@ ipcMain.on("open-folder-dialog", async () => {
     properties: ["openDirectory"],
   });
 
-  if (result.canceled) {
-    return;
-  }
+  if (result.canceled) return;
 
   const sharedPath = result.filePaths[0];
   const port = 5000;
   const url = `http://localhost:${port}`;
   const networkUrl = `http://${getLocalIP()}:${port}`;
 
-  // Start server
-  const command = `PORT=${port} node server.js "${sharedPath}"`;
+  // ✅ Path to server.js (works for both dev and packaged app)
+  const serverScript = path.join(
+    process.resourcesPath,
+    process.platform === "win32" ? "server.js" : "./server.js"
+  );
+
+  const command = `PORT=${port} node "${path.join(
+    __dirname,
+    "server.js"
+  )}" "${sharedPath}"`;
+
   exec(command, (err, stdout, stderr) => {
     if (err) {
       console.error("❌ Server Error:", stderr);
@@ -66,3 +73,5 @@ ipcMain.on("open-in-browser", (_, url) => {
 });
 
 app.whenReady().then(createWindow);
+
+app.disableHardwareAcceleration();
