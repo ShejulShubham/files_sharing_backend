@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>File Sharing App</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        padding: 60px;
+        background: #f0f0f0;
+      }
+      h1 {
+        font-size: 28px;
+        color: #333;
+      }
+      button {
+        margin-top: 30px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #0077cc;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #005fa3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📁 Welcome to File Sharing App</h1>
+    <p>
+      Click below to select a folder and start sharing it over your network.
+    </p>
+    <button id="select-folder">Select Folder to Share</button>
+
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      document.getElementById("select-folder").addEventListener("click", () => {
+        ipcRenderer.send("open-folder-dialog");
+      });
+    </script>
+  </body>
+</html>
