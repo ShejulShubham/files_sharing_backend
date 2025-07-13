@@ -5,6 +5,7 @@ const path = require("path");
 
 let mainWindow;
 
+// 🌐 Get the current local IP address
 function getLocalIP() {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -17,6 +18,26 @@ function getLocalIP() {
   return "localhost";
 }
 
+// 🧠 Helper to detect if we're in dev mode
+function isDev() {
+  return !app.isPackaged;
+}
+
+// 📁 Get correct path to views folder
+function getViewsDir() {
+  return isDev()
+    ? path.join(__dirname, "views") // dev: ./views
+    : path.join(process.resourcesPath, "views"); // prod: /resources/views
+}
+
+// 📄 Get correct path to server.js
+function getServerScript() {
+  return isDev()
+    ? path.join(__dirname, "server.js") // dev: ./server.js
+    : path.join(process.resourcesPath, "server.js"); // prod: /resources/server.js
+}
+
+// 🪟 Create Electron window and load welcome page
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 600,
@@ -29,9 +50,11 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, "views", "welcome.html"));
+  const viewsDir = getViewsDir();
+  mainWindow.loadFile(path.join(viewsDir, "welcome.html"));
 }
 
+// 📁 Handle folder selection and start server
 ipcMain.on("open-folder-dialog", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ["openDirectory"],
@@ -43,17 +66,9 @@ ipcMain.on("open-folder-dialog", async () => {
   const port = 5000;
   const url = `http://localhost:${port}`;
   const networkUrl = `http://${getLocalIP()}:${port}`;
+  const serverScript = getServerScript();
 
-  // ✅ Path to server.js (works for both dev and packaged app)
-  const serverScript = path.join(
-    process.resourcesPath,
-    process.platform === "win32" ? "server.js" : "./server.js"
-  );
-
-  const command = `PORT=${port} node "${path.join(
-    __dirname,
-    "server.js"
-  )}" "${sharedPath}"`;
+  const command = `PORT=${port} node "${serverScript}" "${sharedPath}"`;
 
   exec(command, (err, stdout, stderr) => {
     if (err) {
@@ -62,12 +77,13 @@ ipcMain.on("open-folder-dialog", async () => {
     }
   });
 
-  // Load the status UI and send folder data
-  mainWindow.loadFile(path.join(__dirname, "views", "status.html")).then(() => {
+  const viewsDir = getViewsDir();
+  mainWindow.loadFile(path.join(viewsDir, "status.html")).then(() => {
     mainWindow.webContents.send("app-data", { sharedPath, url, networkUrl });
   });
 });
 
+// 🌐 Open the shared link in browser
 ipcMain.on("open-in-browser", (_, url) => {
   shell.openExternal(url);
 });

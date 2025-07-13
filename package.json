@@ -1,9 +1,9 @@
 {
   "name": "files_sharing_backend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "File sharing app with GUI using Electron",
   "main": "electron-main.js",
-  "author": "Shubham Shejul",
+  "author": "Shubham Shejul <shejulshubhamdeshmukh@gmail.com>",
   "license": "ISC",
   "scripts": {
     "dev": "node --watch server.js",
@@ -30,17 +30,29 @@
     "productName": "FileSharingApp",
     "files": [
       "!server.js",
-      "views/**/*",
+      "!node_modules",
+      "!views",
+      "package.json",
       "assets/**/*",
       "electron-main.js"
     ],
     "extraResources": [
-      "server.js"
+      {
+        "from": "server.js",
+        "to": "server.js"
+      },
+      {
+        "from": "node_modules",
+        "to": "node_modules"
+      },
+      {
+        "from": "views",
+        "to": "views"
+      }
     ],
     "linux": {
       "target": [
-        "AppImage",
-        "deb"
+        "AppImage"
       ]
     },
     "win": {

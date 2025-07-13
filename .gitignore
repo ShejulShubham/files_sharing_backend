@@ -1,7 +1,10 @@
 # folders
 /node_modules
 /public/*
+/dist
+/dist/*
 
 # files
 *.env
 temp.sh
+

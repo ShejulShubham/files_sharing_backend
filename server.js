@@ -1,12 +1,23 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const app = express();
 const os = require("os");
 
+const app = express();
+const PORT = process.env.PORT || 5000;
 const directory = process.argv[2] || "..";
-const PORT = 5000;
 const sharedDir = path.resolve(__dirname, directory);
+
+// ✅ Detect development vs production
+function isDev() {
+  return !__dirname.includes("app.asar");
+}
+
+function getViewsPath() {
+  return isDev()
+    ? path.join(__dirname, "views")
+    : path.join(process.resourcesPath, "views");
+}
 
 function formatFileSize(bytes) {
   if (bytes === 0) return "0 B";
@@ -37,7 +48,6 @@ function getFileTypeLabel(ext) {
 }
 
 const IGNORED_FILES = new Set([
-  "files_sharing_backend",
   "file-share",
   "node_modules",
   "package.json",
@@ -53,7 +63,7 @@ function getLocalIP() {
       if (
         config.family === "IPv4" &&
         !config.internal &&
-        !config.address.startsWith("172.") // skip docker IPs
+        !config.address.startsWith("172.")
       ) {
         return config.address;
       }
@@ -68,8 +78,9 @@ function isVisible(name) {
   return !IGNORED_FILES.has(name);
 }
 
+// ✅ Apply dynamic views path
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", getViewsPath());
 
 app.use(
   "/static",
@@ -116,16 +127,13 @@ app.get("/file", async (req, res) => {
       return res.status(404).render("error", { message: "File not found" });
 
     const fileSize = stats.size;
-
     const entries = await getDirectoryContents(absDir, dirPath);
-
     const filename = path.basename(relPath);
     const ext = filename.split(".").pop().toLowerCase();
     const fileSizeFormatted = formatFileSize(fileSize);
     const fileTypeLabel = getFileTypeLabel(ext);
 
     let content = "";
-
     const textTypes = ["txt", "log", "json", "md"];
     if (textTypes.includes(ext)) {
       content = await fs.promises.readFile(absPath, "utf-8");
