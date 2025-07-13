@@ -5,7 +5,6 @@ const path = require("path");
 
 let mainWindow;
 
-// 🌐 Get the current local IP address
 function getLocalIP() {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -18,26 +17,22 @@ function getLocalIP() {
   return "localhost";
 }
 
-// 🧠 Helper to detect if we're in dev mode
 function isDev() {
   return !app.isPackaged;
 }
 
-// 📁 Get correct path to views folder
 function getViewsDir() {
   return isDev()
-    ? path.join(__dirname, "views") // dev: ./views
-    : path.join(process.resourcesPath, "views"); // prod: /resources/views
+    ? path.join(__dirname, "views")
+    : path.join(process.resourcesPath, "views");
 }
 
-// 📄 Get correct path to server.js
 function getServerScript() {
   return isDev()
-    ? path.join(__dirname, "server.js") // dev: ./server.js
-    : path.join(process.resourcesPath, "server.js"); // prod: /resources/server.js
+    ? path.join(__dirname, "server.js")
+    : path.join(process.resourcesPath, "server.js");
 }
 
-// 🪟 Create Electron window and load welcome page
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 600,
@@ -54,7 +49,6 @@ function createWindow() {
   mainWindow.loadFile(path.join(viewsDir, "welcome.html"));
 }
 
-// 📁 Handle folder selection and start server
 ipcMain.on("open-folder-dialog", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ["openDirectory"],
@@ -68,7 +62,11 @@ ipcMain.on("open-folder-dialog", async () => {
   const networkUrl = `http://${getLocalIP()}:${port}`;
   const serverScript = getServerScript();
 
-  const command = `PORT=${port} node "${serverScript}" "${sharedPath}"`;
+  const command =
+    process.platform === "win32"
+      ? `set PORT=${port} && node "${serverScript}" "${sharedPath}"`
+      : `PORT=${port} node "${serverScript}" "${sharedPath}"`;
+
 
   exec(command, (err, stdout, stderr) => {
     if (err) {
@@ -83,11 +81,9 @@ ipcMain.on("open-folder-dialog", async () => {
   });
 });
 
-// 🌐 Open the shared link in browser
 ipcMain.on("open-in-browser", (_, url) => {
   shell.openExternal(url);
 });
 
 app.whenReady().then(createWindow);
-
 app.disableHardwareAcceleration();

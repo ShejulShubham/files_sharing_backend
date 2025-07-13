@@ -48,6 +48,10 @@
       {
         "from": "views",
         "to": "views"
+      },
+      {
+        "from": "assets",
+        "to": "assets"
       }
     ],
     "linux": {
