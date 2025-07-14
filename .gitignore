@@ -5,3 +5,4 @@
 # files
 *.env
 temp.sh
+.port_history

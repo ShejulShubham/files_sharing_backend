@@ -14,6 +14,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
     <style>
+      body {
+        background-color: #111;
+        color: #eee;
+      }
+
       .breadcrumb {
         flex-wrap: wrap;
         font-size: 0.95rem;
@@ -21,6 +26,11 @@
 
       .breadcrumb-item a {
         text-decoration: none;
+        color: #0dcaf0;
+      }
+
+      .breadcrumb-item.active {
+        color: #ffc107;
       }
 
       .file-entry {
@@ -42,39 +52,6 @@
         border-radius: 8px;
         text-align: center;
         word-wrap: break-word;
-        overflow: hidden;
-        height: 100%;
-        transition: background-color 0.2s;
-      }
-
-      .file-card:hover {
-        background-color: #2a2a2a;
-      }
-
-      .file-icon {
-        font-size: 1.8rem;
-        margin-bottom: 5px;
-      }
-
-      .file-name {
-        font-size: 0.9rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .file-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 1rem;
-      }
-
-      .file-card {
-        background-color: #1f1f1f;
-        border: 1px solid #444;
-        padding: 10px;
-        border-radius: 8px;
-        text-align: center;
         overflow: hidden;
         transition: background-color 0.2s;
       }
@@ -113,26 +90,24 @@
     <div class="container py-4">
       <!-- Header & QR Button -->
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">
-          <i class="fas fa-folder-open"></i>
-          File Explorer
-        </h2>
+        <h2 class="mb-0"><i class="fas fa-folder-open"></i> File Explorer</h2>
         <button
           onclick="showQRCode()"
           class="btn btn-outline-info btn-sm"
           title="Share via QR"
         >
-          <i class="fas fa-qrcode"> Share via QR</i>
+          <i class="fas fa-qrcode"></i> Share via QR
         </button>
       </div>
+
+      <!-- Toggle View -->
       <div class="d-flex flex-row-reverse gap-2">
         <button
           onclick="toggleView()"
           class="btn btn-outline-light btn-sm m-3"
           title="Toggle View"
         >
-          <i class="fas fa-th" id="toggleIcon"></i>
-          Toggle view
+          <i class="fas fa-th" id="toggleIcon"></i> Toggle view
         </button>
       </div>
 
@@ -142,14 +117,14 @@
       <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb bg-transparent p-0 m-0">
           <li class="breadcrumb-item">
-            <a href="/" class="text-light">Home</a>
+            <a href="/files" class="text-light">Home</a>
           </li>
           <% parts.forEach((part, index) => { partial += '/' + part; const
           isLast = index === parts.length - 1; %>
           <li
             class="breadcrumb-item <%= isLast ? 'active text-warning' : '' %>"
           >
-            <% if (isLast) { %><%= part %><% } else { %>
+            <% if (isLast) { %> <%= part %> <% } else { %>
             <a
               href="/files?path=<%= encodeURIComponent(partial) %>"
               class="text-light"
@@ -162,7 +137,7 @@
       </nav>
       <% } %>
 
-      <!-- File and Folder List -->
+      <!-- Files/Folders Display -->
       <% if (entries.length === 0) { %>
       <div class="alert alert-warning">📁 This folder is empty.</div>
       <% } else { %>
@@ -188,9 +163,7 @@
             class="text-light text-decoration-none"
             title="<%= entry.name %>"
           >
-            <div class="file-icon text-muted">
-              <i class="fas fa-file"></i>
-            </div>
+            <div class="file-icon text-muted"><i class="fas fa-file"></i></div>
             <div class="file-name"><%= entry.name %></div>
           </a>
           <div class="mt-2">
@@ -204,7 +177,7 @@
           </div>
           <% } %>
         </div>
-        <% }); %>
+        <% }) %>
       </div>
 
       <!-- LIST VIEW -->
@@ -247,7 +220,7 @@
           </a>
           <% } %>
         </li>
-        <% }); %>
+        <% }) %>
       </ul>
       <% } %>
 
@@ -288,7 +261,7 @@
 
         qrDiv.innerHTML = "";
 
-        const ip = "<%= localIP %>"; // from server
+        const ip = "<%= localIP %>";
         const port = location.port || "<%= port %>";
         const path = location.pathname + location.search;
         const fullURL = `${location.protocol}//${ip}:${port}${path}`;
@@ -321,7 +294,6 @@
         grid.classList.toggle("d-none");
         list.classList.toggle("d-none");
 
-        // Switch icon
         if (grid.classList.contains("d-none")) {
           icon.classList.remove("fa-th");
           icon.classList.add("fa-list");
@@ -330,6 +302,8 @@
           icon.classList.add("fa-th");
         }
       }
+
+      toggleView();
     </script>
   </body>
 </html>
