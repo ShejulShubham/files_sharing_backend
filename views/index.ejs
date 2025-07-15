@@ -148,7 +148,7 @@
         <div class="file-card">
           <% if (entry.isDir) { %>
           <a
-            href="/files?path=<%= entry.encodedPath %>"
+            href="/files?path=/<%= entry.encodedPath %>"
             class="text-light text-decoration-none"
             title="<%= entry.name %>"
           >

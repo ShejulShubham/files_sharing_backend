@@ -14,7 +14,7 @@ URL="http://localhost:$PORT"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_FILE="server.js"
 PARENT_PATH=$(dirname "$PROJECT_DIR")
-REAL_USER_HOME="/home/shubham-shejul"
+REAL_USER_HOME="$HOME"
 NVM_DIR="$REAL_USER_HOME/.nvm"
 
 # -------------------------------------------------
@@ -31,9 +31,8 @@ if [[ "$CHOICE" =~ ^[Yy]$ ]]; then
         read -e -p $'\e[1;35mEnter file path:\e[0m ' DIRECTORY_PATH
 
     if [[ -z "$DIRECTORY_PATH" ]]; then
-        DIRECTORY_PATH=$PARENT_PATH
-        echo -e "${YELLOW}⚠️ No input provided. Will share the parent folder${RESET}"
-        break
+        echo -e "${YELLOW}Exiting: No directory path provided.${RESET}"
+        exit 1
     elif [[ -d "$DIRECTORY_PATH" ]]; then
         break
     else

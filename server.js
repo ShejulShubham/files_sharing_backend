@@ -1,9 +1,9 @@
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { execFile } = require("child_process");
 const bodyParser = require("body-parser");
+const fs = require("fs");
 
 const app = express();
 
@@ -27,14 +27,8 @@ app.use("/static", (req, res, next) => {
   })(req, res, next);
 });
 
-// ---------------- Helper Functions ---------------- //
-
 function getDefaultRootPath() {
-  if (process.platform === "win32") {
-    return "C:\\";
-  } else {
-    return "/";
-  }
+  return process.platform === "win32" ? "C:\\" : "/";
 }
 
 function getLocalIP() {
@@ -106,14 +100,55 @@ const IGNORED_FILES = new Set([
   ".env",
 ]);
 
+function isSystemFile(fileName) {
+  const isWindows = process.platform === "win32";
+
+  const windowsSystemFiles = new Set([
+    "$Recycle.Bin",
+    "System Volume Information",
+    "pagefile.sys",
+    "swapfile.sys",
+    "hiberfil.sys",
+    "Program Files",
+    "Program Files (x86)",
+    "Windows",
+    "$WinREAgent",
+    "PerfLogs",
+    "Recovery",
+  ]);
+
+  const linuxSystemFiles = new Set([
+    "/boot",
+    "/dev",
+    "/etc",
+    "/lib",
+    "/lib64",
+    "/proc",
+    "/run",
+    "/sbin",
+    "/sys",
+    "/usr",
+    "/var",
+    "/tmp",
+    "/snap",
+    "/lost+found",
+  ]);
+
+  if (isWindows) {
+    return windowsSystemFiles.has(fileName);
+  }
+
+  return linuxSystemFiles.has(fileName);
+}
+
 function isVisible(name) {
-  return !IGNORED_FILES.has(name);
+  return !IGNORED_FILES.has(name) && !isSystemFile(name);
 }
 
 async function getDirectoryContents(absPath, relPath = "") {
   const items = await fs.promises.readdir(absPath, { withFileTypes: true });
   return items
-    .filter((entry) => absPath === "/" || isVisible(entry.name))
+    .filter((entry) => isVisible(entry.name))
     .map((entry) => ({
       name: entry.name,
       isDir: entry.isDirectory(),
@@ -121,24 +156,18 @@ async function getDirectoryContents(absPath, relPath = "") {
     }));
 }
 
-// ---------------- Routes ---------------- //
+// Routes
+app.get("/", (req, res) => res.redirect("/home"));
 
-app.get("/", async (req, res) => {
-  // res.render("home");
-});
+app.get("/home", (req, res) => res.render("home"));
 
-app.get("/home", (req, res) => {
-  const url = `http://${localIP}:${PORT}`;
-  res.render("home");
-});
+app.get("/ping", (req, res) => res.status(200).send("OK"));
 
 app.get("/browse", async (req, res) => {
-  let rawPath = null;
-  if(req.query?.path === "/"){
-    rawPath = getDefaultRootPath();
-  }else {
-    rawPath = decodeURIComponent(req.query.path || "/");
-  }
+  const rawPath =
+    req.query?.path === "/"
+      ? getDefaultRootPath()
+      : decodeURIComponent(req.query.path || "/");
 
   try {
     if (!fs.existsSync(rawPath)) {
@@ -169,7 +198,6 @@ app.get("/browse", async (req, res) => {
 app.get("/api/select-folder", async (req, res) => {
   try {
     const selectedPath = await getFolderFromDialog();
-
     if (
       !fs.existsSync(selectedPath) ||
       !fs.lstatSync(selectedPath).isDirectory()
@@ -178,7 +206,6 @@ app.get("/api/select-folder", async (req, res) => {
         .status(400)
         .json({ success: false, error: "Invalid directory selected." });
     }
-
     global.sharedDir = selectedPath;
     res.json({ success: true, path: selectedPath });
   } catch (err) {
@@ -186,7 +213,6 @@ app.get("/api/select-folder", async (req, res) => {
   }
 });
 
-// Important: Ensure proper response type to prevent parsing HTML as JSON
 app.post("/pick-folder", async (req, res) => {
   const folderPath = req.body.path?.trim();
   console.log("🔄 Requested new share folder:", folderPath);
@@ -196,26 +222,23 @@ app.post("/pick-folder", async (req, res) => {
     !fs.existsSync(folderPath) ||
     !fs.lstatSync(folderPath).isDirectory()
   ) {
-    if (req.headers.accept?.includes("application/json")) {
-      return res.status(400).json({ success: false, error: "Invalid folder" });
-    } else {
-      return res.status(400).send("Invalid folder");
-    }
+    const errorMsg = "Invalid folder";
+    return req.headers.accept?.includes("application/json")
+      ? res.status(400).json({ success: false, error: errorMsg })
+      : res.status(400).send(errorMsg);
   }
 
   sharedDir = folderPath;
   global.sharedDir = folderPath;
   console.log(`📁 New shared folder set to: ${sharedDir}`);
 
-  if (req.headers.accept?.includes("application/json")) {
-    return res.json({ success: true });
-  } else {
-    return res.redirect("/files");
-  }
+  return req.headers.accept?.includes("application/json")
+    ? res.json({ success: true })
+    : res.redirect("/files");
 });
 
 app.get("/files", async (req, res) => {
-  const relPath = "";
+  const relPath = decodeURIComponent(req.query.path || "");
   const baseDir = global.sharedDir || sharedDir;
   const absPath = path.join(baseDir, relPath);
 
@@ -223,8 +246,15 @@ app.get("/files", async (req, res) => {
     return res.status(403).render("error", { message: "Access denied" });
   }
 
-  const entries = await getDirectoryContents(absPath, relPath);
-  res.render("index", { path: relPath, entries, localIP, port: PORT });
+  try {
+    const entries = await getDirectoryContents(absPath, relPath);
+    res.render("index", { path: relPath, entries, localIP, port: PORT });
+  } catch (err) {
+    console.error("Error getting directory contents for /files:", err);
+    res
+      .status(500)
+      .render("error", { message: "Failed to read directory contents." });
+  }
 });
 
 app.get("/file", async (req, res) => {
@@ -273,7 +303,14 @@ app.get("/file", async (req, res) => {
 });
 
 app.get("/stream", (req, res) => {
-  const filePath = path.join(global.sharedDir || sharedDir, req.query.path);
+  const requestedPath = decodeURIComponent(req.query.path || "");
+  const baseDir = global.sharedDir || sharedDir;
+  const filePath = path.join(baseDir, requestedPath);
+
+  if (!filePath.startsWith(baseDir)) {
+    return res.status(403).send("Access denied");
+  }
+
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) return res.status(404).send("File not found");
 
@@ -302,7 +339,14 @@ app.get("/stream", (req, res) => {
 });
 
 app.get("/download", (req, res) => {
-  const filePath = path.join(global.sharedDir || sharedDir, req.query.path);
+  const requestedPath = decodeURIComponent(req.query.path || "");
+  const baseDir = global.sharedDir || sharedDir;
+  const filePath = path.join(baseDir, requestedPath);
+
+  if (!filePath.startsWith(baseDir)) {
+    return res.status(403).send("Access denied");
+  }
+
   res.download(filePath);
 });
 
@@ -322,8 +366,6 @@ app.post("/shutdown", (req, res) => {
   }, 1000);
 });
 
-// ---------------- Error Handling ---------------- //
-
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   if (req.headers.accept?.includes("application/json")) {
@@ -342,8 +384,6 @@ app.use((req, res) => {
     res.status(404).render("error", { message: "Page not found" });
   }
 });
-
-// ---------------- Start Server ---------------- //
 
 app.listen(PORT, () => {
   console.log(`✅ Sharing: ${sharedDir}`);

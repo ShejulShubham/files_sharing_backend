@@ -41,9 +41,9 @@
       }
     </style>
   </head>
-  <body>
+  <body class="bg-dark text-light">
     <div class="container">
-      <h1 class="mb-4">📂 File Sharing App</h1>
+      <h1 class="mb-4"><i class="fas fa-folder-open"></i> File Sharing App</h1>
       <p>Select an action to begin:</p>
 
       <div>
@@ -68,9 +68,9 @@
       const status = document.getElementById("statusMsg");
       document.getElementById("browseBtn").addEventListener("click", () => {
         status.classList.remove("d-none");
-        status.innerHTML = "📂 Opening folder browser...";
+        status.innerHTML = "<div class=\"spinner-border text-info\" role=\"status\"><span class=\"visually-hidden\">Loading...</span></div> <div>Opening folder browser...</div>";
         setTimeout(() => {
-          window.location.href = "/browse?path=" + "/";
+          window.location.href = "/browse";
         }, 500);
       });
 
@@ -78,14 +78,14 @@
         if (!confirm("Are you sure you want to stop the server?")) return;
 
         status.classList.remove("d-none");
-        status.innerHTML = "🛑 Shutting down...";
+        status.innerHTML = "<div class=\"spinner-border text-danger\" role=\"status\"><span class=\"visually-hidden\">Loading...</span></div> <div>Shutting down...</div>";
 
         try {
           await fetch("/shutdown", { method: "POST" });
           status.innerHTML =
-            "✅ Server stopped. You can now close this window.";
+            "<div class=\"text-success\">✅ Server stopped. You can now close this window.</div>";
         } catch (err) {
-          status.innerHTML = "❌ Failed to stop server.";
+          status.innerHTML = "<div class=\"text-danger\">❌ Failed to stop server.</div>";
         }
       });
     </script>

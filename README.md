@@ -1,108 +1,65 @@
-# 📁 File Sharing Web App
+# File Sharing Application
 
-A clean, responsive file sharing and streaming web application built using **Node.js**, **Express**, and **EJS** templating.  
-Supports file/folder browsing, media streaming (audio/video/image), text preview, file downloads, and QR sharing.
+This is a simple file sharing application built with Node.js and Express.
 
----
+## Features
 
-## 🚀 Features
+- Share files and directories over your local network.
+- Browse shared content through a web interface.
+- Download individual files.
+- Stream video and audio files.
 
-- 📂 Browse directories & subfolders
-- 📄 View file details & sizes
-- 🎥 Preview images, videos, audio, and text files
-- 📥 Download files with a single click
-- 📱 Share links via QR code (mobile-friendly)
-- 🌙 Light/Dark mode with Bootstrap 5
-- 🔐 Secure relative path resolution
+## Installation
 
----
+1. Clone the repository:
 
-## 🧩 Prerequisites
-
-| Tool           | Version        |
-|----------------|----------------|
-| Node.js        | v16+ or v18+   |
-| npm            | Installed with Node.js |
-| git            | For cloning repo |
-| Bash/Zsh       | (for Linux setup script) |
-
----
-
-## 💻 Setup Instructions
-
-### 🪟 Windows
-
-1. **Install Node.js:**
-   - Download and install from [https://nodejs.org](https://nodejs.org)
-
-2. **Clone the project or download ZIP into the folder you want to share:**
    ```bash
-   git clone https://github.com/ShejulShubham/files_sharing_backend
-   cd files-sharing-app
+   git clone <repository_url>
+   cd files_sharing_backend
    ```
 
-3. **Install dependencies:**
+2. Install dependencies:
 
    ```bash
    npm install
    ```
 
-4. **Run the app:**
+## Usage
 
-   double click on file `start.bat` it will open a command line with hosting URL
+### CLI Mode
 
-5. **Open your browser:**
+To start the application in CLI mode:
 
-   * [http://localhost:5000](http://localhost:5000)
+```bash
+./start_cli.sh
+```
 
----
+This will prompt you to select a directory to share. If no directory is provided, it will share the parent directory of the application.
 
-### 🐧 Linux / Ubuntu / WSL
+### GUI Mode (Windows)
 
-1. **Install Node.js using NVM:**
+To start the application in GUI mode on Windows:
 
-   ```bash
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-   source ~/.bashrc
-   nvm install 18
-   nvm use 18
-   ```
+```bash
+start_gui.bat
+```
 
-2. **Clone the project or download ZIP into the folder you want to share:**
+This will open a browser window with the application.
 
-   ```bash
-   git clone https://github.com/ShejulShubham/files_sharing_backend
-   cd files-sharing-app
-   ```
+### GUI Mode (Linux)
 
-3. **Install dependencies:**
+To start the application in GUI mode on Linux:
 
-   ```bash
-   npm install
-   ```
+```bash
+./start_gui.sh
+```
 
-4. **Run with auto-setup script:**
+This will open a browser window with the application.
 
-   > Includes dynamic IP display and browser launch
+## Contributing
 
-   ```bash
-   chmod +x ./start.sh
-   ./start.sh
-   ```
+Feel free to contribute to this project by opening issues or submitting pull requests.
 
----
+## License
 
-## ⚙️ Customize
-
-* **Change shared folder:**
-  Modify `sharedDir` in `server.js` to point to a different directory.
-
-* **Change port:**
-  Update `PORT=5000` in script.
-
----
-
-## 🧑‍💻 Author
-
-**Shejul Shubham**
-[LinkedIn](https://www.linkedin.com/in/shejul-shubham) | [GitHub](https://github.com/shejulshubham)
+This project is licensed under the MIT License.
