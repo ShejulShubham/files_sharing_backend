@@ -75,22 +75,6 @@ function getFileTypeLabel(ext) {
   return "Unknown File Type";
 }
 
-function getFolderFromDialog(scriptPath = "utils/select-folder.js") {
-  const absPath = path.join(__dirname, scriptPath);
-  return new Promise((resolve, reject) => {
-    execFile("node", [absPath], { timeout: 30000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error("❌ Folder picker error:", error.message || stderr);
-        return reject(new Error("Folder picker failed or cancelled."));
-      }
-
-      const selectedPath = stdout.trim();
-      if (!selectedPath) return reject(new Error("No folder selected."));
-      resolve(selectedPath);
-    });
-  });
-}
-
 const IGNORED_FILES = new Set([
   "file-share",
   "node_modules",
@@ -115,23 +99,30 @@ function isSystemFile(fileName) {
     "$WinREAgent",
     "PerfLogs",
     "Recovery",
+    "Documents and Settings",
+    "ProgramData",
+    "System32",
   ]);
 
   const linuxSystemFiles = new Set([
-    "/boot",
-    "/dev",
-    "/etc",
-    "/lib",
-    "/lib64",
-    "/proc",
-    "/run",
-    "/sbin",
-    "/sys",
-    "/usr",
-    "/var",
-    "/tmp",
-    "/snap",
-    "/lost+found",
+    "boot",
+    "dev",
+    "etc",
+    "lib",
+    "lib64",
+    "proc",
+    "run",
+    "sbin",
+    "sys",
+    "usr",
+    "var",
+    "tmp",
+    "snap",
+    "lost+found",
+    "root",
+    "srv",
+    "mnt",
+    "media",
   ]);
 
   if (isWindows) {
@@ -141,8 +132,12 @@ function isSystemFile(fileName) {
   return linuxSystemFiles.has(fileName);
 }
 
+function isHiddenFile(fileName) {
+  return fileName.startsWith(".");
+}
+
 function isVisible(name) {
-  return !IGNORED_FILES.has(name) && !isSystemFile(name);
+  return !IGNORED_FILES.has(name) && !isSystemFile(name) && !isHiddenFile(name);
 }
 
 async function getDirectoryContents(absPath, relPath = "") {
@@ -157,61 +152,9 @@ async function getDirectoryContents(absPath, relPath = "") {
 }
 
 // Routes
-app.get("/", (req, res) => res.redirect("/home"));
-
-app.get("/home", (req, res) => res.render("home"));
+app.get("/", (req, res) => res.redirect("/files"));
 
 app.get("/ping", (req, res) => res.status(200).send("OK"));
-
-app.get("/browse", async (req, res) => {
-  const rawPath =
-    req.query?.path === "/"
-      ? getDefaultRootPath()
-      : decodeURIComponent(req.query.path || "/");
-
-  try {
-    if (!fs.existsSync(rawPath)) {
-      return res.status(404).render("error", { message: "Path not found" });
-    }
-
-    const entries = await getDirectoryContents(rawPath);
-    const breadcrumbs = rawPath
-      .split("/")
-      .filter(Boolean)
-      .map((segment, index, array) => {
-        const fullPath = "/" + array.slice(0, index + 1).join("/");
-        return { name: segment || "/", path: fullPath };
-      });
-
-    res.render("browse", {
-      currentPath: rawPath,
-      entries,
-      breadcrumbs,
-      path,
-    });
-  } catch (err) {
-    console.error("Browse error:", err);
-    res.status(500).render("error", { message: "Failed to read directory" });
-  }
-});
-
-app.get("/api/select-folder", async (req, res) => {
-  try {
-    const selectedPath = await getFolderFromDialog();
-    if (
-      !fs.existsSync(selectedPath) ||
-      !fs.lstatSync(selectedPath).isDirectory()
-    ) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid directory selected." });
-    }
-    global.sharedDir = selectedPath;
-    res.json({ success: true, path: selectedPath });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 app.post("/pick-folder", async (req, res) => {
   const folderPath = req.body.path?.trim();

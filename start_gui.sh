@@ -26,11 +26,27 @@ check_port() {
     fi
 }
 
+find_available_port() {
+    local current_port=$1
+    echo -e "${CYAN}Searching for an available port automatically...${RESET}" >&2
+    while true; do
+        current_port=$((current_port + 1))
+        local pid_on_port=$(check_port $current_port)
+        if [[ -z "$pid_on_port" ]]; then
+            echo -e "${GREEN}Found available port: $current_port${RESET}" >&2
+            echo "$current_port" # This is the actual return value
+            return
+        fi
+        echo -e "${YELLOW}Port $current_port is in use, trying next...${RESET}" >&2
+        sleep 0.1 # Small delay to prevent busy-waiting
+    done
+}
+
 cleanup() {
-    echo -e "\n${CYAN}ℹ️ Script interrupted. Shutting down background server...${RESET}"
+    echo -e "\n${CYAN}ℹ️ Script interrupted. Shutting down background server...${RESET}" >&2
     if [ ! -z "$SERVER_PID" ] && ps -p $SERVER_PID > /dev/null; then
         kill $SERVER_PID
-        echo -e "${GREEN}✅ Server with PID $SERVER_PID stopped.${RESET}"
+        echo -e "${GREEN}✅ Server with PID $SERVER_PID stopped.${RESET}" >&2
     fi
     exit 0
 }
@@ -48,7 +64,27 @@ while true; do
     read -p "Kill it, choose another port, or exit? (k/c/e): " choice
     case "$choice" in
         k|K) kill -9 $PID; echo -e "${RED}🔪 Process $PID killed.${RESET}"; sleep 1;;
-        c|C) read -p "Enter new port: " PORT;;
+        c|C)
+            echo -e "${CYAN}1.${RESET} Automatic port selection (starts from $((PORT + 1)))"
+            echo -e "${CYAN}2.${RESET} Manually enter port"
+            read -p "Choose (1/2): " port_choice
+            case "$port_choice" in
+                1)
+                    PORT=$(find_available_port $PORT)
+                    ;;
+                2)
+                    read -p "Enter custom port (leave blank for automatic): " manual_port
+                    if [[ -z "$manual_port" ]]; then
+                        PORT=$(find_available_port $PORT)
+                    else
+                        PORT=$manual_port
+                    fi
+                    ;;
+                *)
+                    echo -e "${RED}❌ Invalid choice. Keeping current port for re-evaluation.${RESET}"
+                    ;;
+            esac
+            ;;
         e|E) exit 1;;
         *) echo "❌ Invalid option.";;
     esac

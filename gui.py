@@ -75,7 +75,7 @@ def update_server_status():
 # --- GUI Setup ---
 root = tk.Tk()
 root.title("File Sharer Control")
-root.geometry("500x280") # Increased window size
+root.attributes('-fullscreen', True) # Make window full screen
 root.resizable(False, False)
 root.tk_setPalette(background="#2e2e2e", foreground="#ffffff")
 
