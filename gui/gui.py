@@ -39,7 +39,7 @@ def select_and_share_folder():
         response.raise_for_status()
         if response.json().get("success"):
             webbrowser.open(f"{BACKEND_URL}/files?path=")
-            root.destroy()  # Close GUI, but server will keep running
+            root.destroy()
         else:
             error_msg = response.json().get("error", "Unknown error.")
             messagebox.showerror("Sharing Failed", f"Server error: {error_msg}")
@@ -75,7 +75,7 @@ def update_server_status():
 # --- GUI Setup ---
 root = tk.Tk()
 root.title("File Sharer Control")
-root.attributes('-fullscreen', True) # Make window full screen
+# root.attributes('-fullscreen', True) # Make window full screen
 root.resizable(False, False)
 root.tk_setPalette(background="#2e2e2e", foreground="#ffffff")
 

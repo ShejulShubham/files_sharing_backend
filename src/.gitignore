@@ -1,0 +1,11 @@
+# folders
+/node_modules
+/temp
+/temp/*
+/log
+/log/*
+
+# files
+*.env
+temp.sh
+.port_history
