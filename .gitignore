@@ -1,8 +1,0 @@
-# folders
-/node_modules
-/public/*
-
-# files
-*.env
-temp.sh
-.port_history
