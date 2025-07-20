@@ -1,64 +1,88 @@
+Here’s your updated and cleaned-up `README.md`, aligned with the **current version** of your project where users only need to run `run.bat` or `run.sh`:
+
+---
+
+````markdown
 # File Sharing Application
 
-This is a simple file sharing application built with Node.js and Express.
+A simple cross-platform file sharing application built using Node.js, with optional GUI folder selection powered by Python.
 
 ## Features
 
-- Share files and directories over your local network.
-- Browse shared content through a web interface.
-- Download individual files.
-- Stream video and audio files.
+- Share any folder over your local (home) network.
+- Access shared folders through a browser-based interface.
+- Works on both **Windows** and **Linux** systems.
+- No installation needed — just run and share!
 
-## Installation
+## Getting Started
 
-1. Clone the repository:
+You can either **clone the repository** or **download the ZIP** of this project.
 
-   ```bash
-   git clone <repository_url>
-   cd files_sharing_backend
-   ```
+### 1. Clone the Repository
 
-2. Install dependencies:
+```bash
+git clone <repository_url>
+```
 
-   ```bash
-   npm install
-   ```
+
+### 2. Set current directory
+```bash
+cd files_sharing_backend
+````
+
+Or simply [download the ZIP](https://github.com/ShejulShubham/files_sharing_backend) and extract it.
+
+---
 
 ## Usage
 
-### CLI Mode
+After downloading/cloning:
 
-To start the application in CLI mode:
+* On **Windows**, double-click or run:
 
-```bash
-./start_cli.sh
+  ```
+  run.bat
+  ```
+
+* On **Linux**, execute:
+
+  ```bash
+  ./run.sh
+  ```
+
+You will be prompted to choose an interface mode:
+
+* **CLI** – select folder via terminal.
+* **GUI** – choose folder via graphical window.
+
+Once selected, your chosen folder will be shared on your local network, accessible via browser using a URL like:
+
+```
+http://<host-ip>:<port>
 ```
 
-This will prompt you to select a directory to share. If no directory is provided, it will share the parent directory of the application.
+---
 
-### GUI Mode (Windows)
-
-To start the application in GUI mode on Windows:
+## Folder Structure
 
 ```bash
-start_gui.bat
+/gui         → Python GUI for folder selection
+/log         → App log files, gets created after running the app
+/scripts     → Mode launchers (start_cli.*, start_gui.*)
+/src
+  ├── /utils → Helpers like IP detection
+  └── /views → Express route handlers
+run.sh       → Linux entry point
+run.bat      → Windows entry point
 ```
 
-This will open a browser window with the application.
-
-### GUI Mode (Linux)
-
-To start the application in GUI mode on Linux:
-
-```bash
-./start_gui.sh
-```
-
-This will open a browser window with the application.
+---
 
 ## Contributing
 
-Feel free to contribute to this project by opening issues or submitting pull requests.
+Feel free to open issues or pull requests. Bug fixes, features, or documentation improvements are welcome.
+
+---
 
 ## License
 
