@@ -171,8 +171,8 @@ app.post("/pick-folder", async (req, res) => {
       : res.status(400).send(errorMsg);
   }
 
-  sharedDir = folderPath;
-  global.sharedDir = folderPath;
+  sharedDir = path.resolve(folderPath);
+  global.sharedDir = path.resolve(folderPath);
   console.log(`📁 New shared folder set to: ${sharedDir}`);
 
   return req.headers.accept?.includes("application/json")

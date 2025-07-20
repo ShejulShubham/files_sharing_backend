@@ -1,0 +1,14 @@
+--- STARTING SCRIPT --- 
+[15-07-2025 22.27.38.27] Script started 
+[15-07-2025 22.27.38.27] Variables set: PORT=5000 
+[15-07-2025 22.27.38.28] Checking if port 5000 is in use... 
+[15-07-2025 22.27.38.32] Port 5000 is free 
+[15-07-2025 22.27.38.32] Checking for node_modules folder... 
+[15-07-2025 22.27.38.32] node_modules already present. Skipping install. 
+[15-07-2025 22.27.38.33] Starting server.js on port 5000... 
+[15-07-2025 22.27.40.23] Server started successfully on port 5000 with PID 17968 
+[15-07-2025 22.27.40.23] === STEP 1 COMPLETED === 
+[15-07-2025 22.28.02.43] Attempting to stop server (PID: 17968
+ERROR: The process "17968" not found.
+[15-07-2025 22.28.04.13] Server stopped. 
+[15-07-2025 22.28.04.13] Script finished 
