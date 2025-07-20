@@ -1,6 +1,9 @@
 # folders
 /node_modules
-/public/*
+/temp
+/temp/*
+/log
+/log/*
 
 # files
 *.env
