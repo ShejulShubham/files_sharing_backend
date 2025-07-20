@@ -90,11 +90,30 @@ if %errorlevel% equ 0 (
 )
 echo ✅ Using port: %AVAILABLE_PORT% >> "%LOG_FILE%"
 
+:: --------- Update PORT in .env file ---------
+set "ENV_FILE=%PROJECT_DIR%\.env"
+set "TEMP_ENV=%TEMP%\temp_env.txt"
+
+if exist "%ENV_FILE%" (
+    > "%TEMP_ENV%" (
+        for /f "usebackq tokens=*" %%L in ("%ENV_FILE%") do (
+            echo %%L | findstr /b /c:"PORT=" >nul
+            if errorlevel 1 (
+                echo %%L
+            )
+        )
+        echo PORT=%AVAILABLE_PORT%
+    )
+    move /Y "%TEMP_ENV%" "%ENV_FILE%" >nul
+) else (
+    echo PORT=%AVAILABLE_PORT% > "%ENV_FILE%"
+)
+
+
 :: --------- Start Server -----------------
 pushd "%PROJECT_DIR%"
 start /min "" node "%SERVER_FILE%" %AVAILABLE_PORT% >nul 2>&1
 popd
-
 
 :: --------- Ask user to choose interface (GUI or CLI) ----------
 echo.
