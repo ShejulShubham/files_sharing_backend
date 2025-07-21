@@ -3,19 +3,13 @@ const path = require("path");
 const os = require("os");
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const path = require("path");
-const dotenv = require("dotenv");
-
-// Load .env from parent directory
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
 const parentDir = "..";
 const directory = process.argv[2] || parentDir;
 const argPort = process.argv[2];
-const envPort = process.env.PORT;
-const PORT = argPort || envPort || 5000;
+const PORT = argPort || 5000;
 let sharedDir = path.resolve(__dirname, directory);
 const localIP = getLocalIP();
 
