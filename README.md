@@ -1,8 +1,3 @@
-Here’s your updated and cleaned-up `README.md`, aligned with the **current version** of your project where users only need to run `run.bat` or `run.sh`:
-
----
-
-````markdown
 # File Sharing Application
 
 A simple cross-platform file sharing application built using Node.js, with optional GUI folder selection powered by Python.
@@ -16,7 +11,7 @@ A simple cross-platform file sharing application built using Node.js, with optio
 
 ## Getting Started
 
-You can either **clone the repository** or **download the ZIP** of this project.
+You can either **clone the repository** or **download the ZIP**.
 
 ### 1. Clone the Repository
 
@@ -24,11 +19,11 @@ You can either **clone the repository** or **download the ZIP** of this project.
 git clone <repository_url>
 ```
 
+### 2. Set the Current Directory
 
-### 2. Set current directory
 ```bash
 cd files_sharing_backend
-````
+```
 
 Or simply [download the ZIP](https://github.com/ShejulShubham/files_sharing_backend) and extract it.
 
@@ -36,7 +31,7 @@ Or simply [download the ZIP](https://github.com/ShejulShubham/files_sharing_back
 
 ## Usage
 
-After downloading/cloning:
+After downloading or cloning:
 
 * On **Windows**, double-click or run:
 
@@ -52,10 +47,10 @@ After downloading/cloning:
 
 You will be prompted to choose an interface mode:
 
-* **CLI** – select folder via terminal.
-* **GUI** – choose folder via graphical window.
+- **CLI** – select a folder via the terminal.
+- **GUI** – choose a folder through a graphical window.
 
-Once selected, your chosen folder will be shared on your local network, accessible via browser using a URL like:
+Once selected, your folder will be shared on the local network and accessible via a browser using a URL like:
 
 ```
 http://<host-ip>:<port>
@@ -67,8 +62,8 @@ http://<host-ip>:<port>
 
 ```bash
 /gui         → Python GUI for folder selection
-/log         → App log files, gets created after running the app
-/scripts     → Mode launchers (start_cli.*, start_gui.*)
+/log         → App log files (created automatically after you run the app)
+/scripts     → Scripts to launch CLI or GUI mode (start_cli.*, start_gui.*)
 /src
   ├── /utils → Helpers like IP detection
   └── /views → Express route handlers
@@ -80,7 +75,7 @@ run.bat      → Windows entry point
 
 ## Contributing
 
-Feel free to open issues or pull requests. Bug fixes, features, or documentation improvements are welcome.
+Feel free to open issues or pull requests. Bug fixes, new features, and documentation improvements are all welcome.
 
 ---
 
